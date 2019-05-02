@@ -1,0 +1,81 @@
+plugins {
+    id 'java'
+    id 'maven'
+    id "maven-publish"
+    id 'com.jfrog.bintray' version '1.8.4'
+    id 'com.github.ben-manes.versions' version '0.21.0'
+}
+
+group = 'pw.aru.libs'
+version = '1.0'
+
+sourceCompatibility = 11
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile 'org.json:json:20180813'
+    compile 'io.projectreactor:reactor-core:3.2.8.RELEASE'
+
+    compileOnly 'org.projectlombok:lombok:1.18.6'
+    annotationProcessor 'org.projectlombok:lombok:1.18.6'
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    archiveClassifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    archiveClassifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+javadoc {
+    failOnError = false
+    options.memberLevel = JavadocMemberLevel.PUBLIC
+    options.author()
+    options.encoding = 'UTF-8'
+    options.addStringOption('-html5')
+}
+
+artifacts {
+    archives javadocJar, sourcesJar
+}
+
+publishing {
+    publications {
+        BintrayRelease(MavenPublication) {
+            from components.java
+            groupId project.group.toString()
+            artifactId project.name.toString()
+            version project.version.toString()
+            artifact javadocJar
+            artifact sourcesJar
+        }
+    }
+}
+
+bintray {
+    user = bintrayUsername
+    key = bintrayApiKey
+    publications = ['BintrayRelease']
+    pkg {
+        repo = 'maven'
+        name = project.name.toString()
+        userOrg = 'arudiscord'
+        licenses = ['MIT']
+        vcsUrl = 'https://github.com/arudiscord/redditstream.git'
+        publish = true
+        version {
+            name = project.version
+        }
+    }
+}
+
+bintrayUpload {
+    dependsOn build
+    dependsOn publishToMavenLocal
+}

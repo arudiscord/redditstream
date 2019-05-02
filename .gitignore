@@ -1,0 +1,10 @@
+/.idea/
+/.gradle/
+/build/
+/out/
+*.iml
+
+/src/main/inspiration
+/token.txt
+/andesite.jar
+/logs/
